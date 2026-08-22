@@ -1,0 +1,67 @@
+---
+title: "Official Statistics Workflow with DPrivStats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Official Statistics Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(DPrivStats)
+set.seed(11)
+```
+
+This vignette sketches an official-statistics workflow: combining multiple
+DP tabulations under a single budget, applying post-processing constraints,
+and comparing composition rules.
+
+## Combining releases under one budget
+
+```{r}
+budget <- new_privacy_budget(epsilon = 4.0, delta = 1e-6, composition = "rdp")
+
+if (can_spend(budget, 1.5)) {
+  budget <- spend(budget, 1.5, "mean income by region table")
+}
+
+if (can_spend(budget, 1.5)) {
+  budget <- spend(budget, 1.5, "education histogram")
+}
+budget
+```
+
+## Post-processing constraints
+
+DP histograms can contain negative noisy counts; truncating at zero and
+normalizing are pure post-processing steps that preserve DP:
+
+```{r}
+data(example_microdata)
+h <- dp_histogram(example_microdata$age, epsilon = 1.0,
+                  breaks = seq(10, 90, by = 10), normalize = TRUE)
+h$estimate # already non-negative by construction
+```
+
+## Composition comparison
+
+For a fixed workflow of small releases, RDP is typically much tighter than
+basic composition:
+
+```{r}
+eps_seq <- c(1.5, 1.5, 1.0)
+compare_composition(eps_seq, delta = 1e-6)
+```
+
+## Disclosure risk intuition
+
+The privacy loss random variable of a Laplace release is exponential; its
+tail probabilities quantify the chance of large losses:
+
+```{r}
+laplace_plr_tail(c(0, 3, 6), epsilon = 1.0)
+```

@@ -1,0 +1,36 @@
+Package: DPrivStats
+Type: Package
+Title: Differentially Private Classical Statistical Inference
+Version: 0.1.0
+Authors@R: person(given = "Mukul", family = "Bijalwan",
+    role = c("aut", "cre"), email = "mukulbijalwan555@gmail.com")
+Description: Implements differentially private (DP) versions of common
+    classical statistical procedures, including descriptive statistics
+    (mean, variance, quantiles, histograms), hypothesis tests (t-test,
+    chi-square, Kolmogorov-Smirnov, one-way ANOVA), and regression
+    (closed-form DP linear regression and DP-SGD for generalized linear
+    models). Provides Laplace and Gaussian mechanisms with analytic
+    calibration, exponential mechanism for medians, privacy-aware
+    confidence intervals that account for both sampling and privacy
+    noise, and privacy budget accounting via basic, advanced, and
+    Renyi differential privacy (RDP) composition. Designed for
+    official statistics and privacy-preserving data analysis research.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.0.0)
+Imports:
+    stats,
+    MASS,
+    Rcpp
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    ggplot2
+LinkingTo: Rcpp
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://github.com/MukulBijalwan/DPrivStats
+BugReports: https://github.com/MukulBijalwan/DPrivStats/issues
+LazyData: true
+Config/roxygen2/version: 8.1.0

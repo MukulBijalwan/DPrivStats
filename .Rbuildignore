@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^data-raw$
+^doc\.R$
+^run\.R$
+^check\.R$
+^.*\.log$
+^.*\.err$
+^cran-comments\.md$

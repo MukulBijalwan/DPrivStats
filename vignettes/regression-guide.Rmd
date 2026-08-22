@@ -1,0 +1,81 @@
+---
+title: "DP Regression and Privacy-Aware Confidence Intervals"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Regression Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(DPrivStats)
+set.seed(7)
+```
+
+## Closed-form DP linear regression
+
+`dp_lm()` fits OLS on clipped data and releases coefficients with the
+analytic Gaussian mechanism calibrated to the L2 sensitivity
+$\Delta_2 = C \cdot D / \lambda_{\min}(X^\top X)$ (see
+`?dp_lm_sensitivity`).
+
+```{r}
+data(example_microdata)
+fit <- dp_lm(income ~ education + age + hours, example_microdata,
+             epsilon = 2.0, delta = 1e-6,
+             bounds = list(y = c(0, 500000)))
+fit
+```
+
+## Privacy-aware confidence intervals
+
+Standard intervals fail under DP because the point estimate is biased by
+privacy noise and the standard error is itself privatized. `dp_confint()`
+adds the known privacy-noise variance to the sampling variance:
+
+```{r}
+ci <- dp_confint(fit)
+ci
+```
+
+Bootstrap alternatives:
+
+```{r}
+dp_confint(fit, method = "parametric_bootstrap", B = 200)
+```
+
+## DP-SGD for GLMs
+
+For logistic regression, `dp_glm()` implements DP-SGD with per-sample
+gradient clipping:
+
+```{r}
+d <- transform(example_microdata,
+               high_income = as.numeric(income > 60000))
+glm_fit <- dp_glm(high_income ~ education + age, d, binomial(),
+                  epsilon = 2.0, delta = 1e-6,
+                  max_grad_norm = 1, n_iter = 300, lr = 0.05,
+                  bounds = list(y = c(0, 1)))
+glm_fit
+```
+
+## Coverage validation
+
+`validate_coverage()` checks that the analytical intervals attain nominal
+coverage across Monte Carlo replicates:
+
+```{r}
+gen <- function(n) {
+  data.frame(x = rnorm(n, 2, 1))
+}
+set.seed(1)
+vc <- validate_coverage(y ~ x, c(`(Intercept)` = 1, x = 2),
+                        sigma = 1, data_gen = gen, n = 400, n_sims = 50,
+                        epsilon = 3, delta = 1e-6,
+                        y_bounds = c(-20, 20))
+vc$coverage_rate
+```

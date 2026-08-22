@@ -1,0 +1,24 @@
+# R package build artifacts
+.DS_Store
+*.Rcheck/
+DPrivStats_*.tar.gz
+DPrivStats_*.tgz
+
+# R history / environment
+.Rhistory
+.Rappignore
+.RData
+.Rproj.user/
+
+# Compiled artifacts
+src/*.o
+src/*.so
+src/*.dll
+src/symbols.rds
+
+# Development scratch files (kept out of the repo, not the tarball)
+doc.R
+run.R
+check.R
+*.log
+*.err

@@ -1,0 +1,92 @@
+---
+title: "Getting Started with DPrivStats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with DPrivStats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(DPrivStats)
+set.seed(42)
+```
+
+This vignette walks through a basic differentially private (DP) analysis
+workflow: loading sensitive microdata, managing a privacy budget, releasing
+DP descriptive statistics, and running a DP hypothesis test.
+
+## Data
+
+We use a simulated census-like microdata set bundled with the package:
+
+```{r}
+data(example_microdata)
+head(example_microdata)
+nrow(example_microdata)
+```
+
+## Privacy budget
+
+All releases draw on a shared privacy budget:
+
+```{r}
+budget <- new_privacy_budget(epsilon = 3.0, delta = 1e-6, composition = "rdp")
+budget
+```
+
+## DP descriptive statistics
+
+```{r}
+income_bounds <- c(0, 500000)
+m <- dp_mean(example_microdata$income, epsilon = 0.5,
+             bounds = income_bounds, mechanism = "laplace")
+m
+```
+
+The estimate carries its privacy cost and sensitivity with it:
+
+```{r}
+m$sensitivity
+```
+
+A DP median via the exponential mechanism, and a DP histogram:
+
+```{r}
+dp_median(example_microdata$income, epsilon = 0.5, bounds = income_bounds,
+          n_bins = 200)$estimate
+
+hist_fit <- dp_histogram(example_microdata$income, epsilon = 1.0,
+                         breaks = seq(0, 500000, by = 100000),
+                         normalize = TRUE)
+round(hist_fit$estimate, 4)
+```
+
+## DP t-test
+
+Do the two regions differ in income?
+
+```{r}
+sub <- subset(example_microdata, region %in% c("North", "South"))
+tt <- dp_t_test(x = sub$income[sub$region == "North"],
+                y = sub$income[sub$region == "South"],
+                epsilon = 1.0, bounds = income_bounds)
+tt
+```
+
+## Budget accounting
+
+```{r}
+budget <- spend(budget, 0.5, description = "DP mean income")
+budget <- spend(budget, 0.5, description = "DP median income")
+budget <- spend(budget, 1.0, description = "DP histogram")
+budget <- spend(budget, 1.0, description = "DP t-test")
+budget
+```
