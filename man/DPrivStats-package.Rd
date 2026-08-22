@@ -11,11 +11,11 @@ procedures with privacy budget accounting and privacy-aware confidence
 intervals.
 }
 \author{
-\strong{Maintainer}: DPrivStats Authors \email{dprivstats@example.org}
+\strong{Maintainer}: Mukul Bijalwan \email{mukulbijalwan555@gmail.com}
 
 Authors:
 \itemize{
-  \item DPrivStats Authors \email{dprivstats@example.org}
+  \item Mukul Bijalwan \email{mukulbijalwan555@gmail.com}
 }
 
 }
