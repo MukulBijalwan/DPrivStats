@@ -1,4 +1,4 @@
-^.*\.Rproj$
+﻿^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
 ^doc\.R$
@@ -7,3 +7,5 @@
 ^.*\.log$
 ^.*\.err$
 ^cran-comments\.md$
+^paper$
+^\.github$
