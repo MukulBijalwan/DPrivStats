@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>DPrivStats Reference Manual</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; margin: 48px 56px; color: #1a1a1a; font-size: 11pt; line-height: 1.45; }
+h1 { font-size: 20pt; border-bottom: 3px solid #2c3e70; padding-bottom: 8px; margin-bottom: 4px; }
+.subtitle { color: #555; font-size: 11pt; margin-bottom: 24px; }
+h2 { font-size: 14pt; color: #2c3e70; border-bottom: 1px solid #b9c4dd; padding-bottom: 3px; margin-top: 30px; page-break-after: avoid; }
+.fn { margin: 16px 0 18px 0; page-break-inside: avoid; }
+.fn h3 { font-size: 11.5pt; font-family: Consolas, monospace; margin: 0 0 2px 0; color: #111; }
+.fn .desc { font-style: italic; color: #444; margin: 0 0 3px 0; }
+pre.usage { background: #f4f6fa; border-left: 3px solid #2c3e70; padding: 7px 10px; font-family: Consolas, monospace; font-size: 9pt; white-space: pre-wrap; margin: 3px 0; }
+.toc td { padding: 2px 18px 2px 0; vertical-align: top; }
+.footer { margin-top: 36px; border-top: 1px solid #999; padding-top: 8px; color: #666; font-size: 9.5pt; }
+@media print { .fn { orphans: 3; } }
+</style></head><body>
+<h1>DPrivStats</h1>
+<div class="subtitle"><b>Reference Manual</b> &mdash; Differentially Private Classical Statistical Inference in R<br>
+Version 0.1.0 &middot; Author: Mukul Bijalwan &middot; License: MIT &middot; github.com/MukulBijalwan/DPrivStats</div><h2>Contents</h2><table class='toc'>
+<tr><td><b>Package Overview</b></td><td><code>DPrivStats-package</code>, <code>example_microdata</code>, <code>simulate_data</code></td></tr>
+<tr><td><b>Privacy Mechanisms</b></td><td><code>rlaplace</code>, <code>cpp_rlaplace</code>, <code>laplace_mechanism</code>, <code>gaussian_sigma</code>, <code>gaussian_mechanism</code>, <code>analytic_gaussian_sigma</code>, <code>analytic_gaussian_mechanism</code>, <code>exponential_mechanism</code></td></tr>
+<tr><td><b>DP Descriptive Statistics</b></td><td><code>stat_sensitivities</code>, <code>dp_mean</code>, <code>dp_variance</code>, <code>dp_quantile</code>, <code>dp_median</code>, <code>dp_histogram</code></td></tr>
+<tr><td><b>DP Hypothesis Tests</b></td><td><code>dp_t_test</code>, <code>dp_chisq_test</code>, <code>dp_ks_test</code>, <code>asymptotic_ks_pvalue</code>, <code>dp_anova</code></td></tr>
+<tr><td><b>DP Regression & Inference</b></td><td><code>dp_lm</code>, <code>dp_lm_sensitivity</code>, <code>summary.dp_lm</code>, <code>dp_glm</code>, <code>clip_gradients</code>, <code>cpp_clip_gradients</code>, <code>dp_confint</code>, <code>confint.dp_lm</code></td></tr>
+<tr><td><b>Privacy Budget & Composition</b></td><td><code>new_privacy_budget</code>, <code>spend</code>, <code>can_spend</code>, <code>basic_composition</code>, <code>advanced_composition_epsilon</code>, <code>epsilon_to_rdp</code>, <code>rdp_to_epsilon</code>, <code>rdp_composition</code>, <code>laplace_plr_tail</code>, <code>empirical_delta_from_losses</code>, <code>simulate_gaussian_losses</code></td></tr>
+<tr><td><b>Diagnostics</b></td><td><code>validate_coverage</code>, <code>compare_utility</code>, <code>compare_composition</code>, <code>dp_utility_diagnostics</code></td></tr>
+<tr><td><b>Print Methods</b></td><td><code>print.dp_estimate</code>, <code>print.dp_htest</code>, <code>print.dp_lm</code>, <code>print.summary.dp_lm</code>, <code>print.dp_glm</code>, <code>print.dp_confint</code>, <code>print.privacy_budget</code></td></tr>
+</table>
+<h2>Package Overview</h2>
+<div class='fn'><h3>DPrivStats-package</h3><p class='desc'>DPrivStats: Differentially Private Classical Inference</p></div>
+<div class='fn'><h3>example_microdata</h3><p class='desc'>Census-like example microdata</p><pre class='usage'>example_microdata</pre></div>
+<div class='fn'><h3>simulate_data</h3><p class='desc'>Simulate synthetic microdata</p><pre class='usage'>simulate_data(n = 1000)</pre></div>
+<h2>Privacy Mechanisms</h2>
+<div class='fn'><h3>rlaplace</h3><p class='desc'>Sample Laplace noise</p><pre class='usage'>rlaplace(n, location = 0, scale = 1)</pre></div>
+<div class='fn'><h3>cpp_rlaplace</h3><p class='desc'>Fast Laplace sampling (C++)</p><pre class='usage'>cpp_rlaplace(n, scale = 1)</pre></div>
+<div class='fn'><h3>laplace_mechanism</h3><p class='desc'>Laplace mechanism</p><pre class='usage'>laplace_mechanism(f, x, epsilon, l1_sensitivity)</pre></div>
+<div class='fn'><h3>gaussian_sigma</h3><p class='desc'>Classic Gaussian noise scale</p><pre class='usage'>gaussian_sigma(epsilon, delta, l2_sensitivity)</pre></div>
+<div class='fn'><h3>gaussian_mechanism</h3><p class='desc'>Gaussian mechanism</p><pre class='usage'>gaussian_mechanism(f, x, epsilon, delta, l2_sensitivity)</pre></div>
+<div class='fn'><h3>analytic_gaussian_sigma</h3><p class='desc'>Analytic Gaussian calibration (Balle &amp; Wang, 2018)</p><pre class='usage'>analytic_gaussian_sigma(epsilon, delta, l2_sensitivity)</pre></div>
+<div class='fn'><h3>analytic_gaussian_mechanism</h3><p class='desc'>Analytic Gaussian mechanism</p><pre class='usage'>analytic_gaussian_mechanism(f, x, epsilon, delta, l2_sensitivity)</pre></div>
+<div class='fn'><h3>exponential_mechanism</h3><p class='desc'>Exponential mechanism sampler</p><pre class='usage'>exponential_mechanism(candidates, scores, epsilon, score_sensitivity = 1)</pre></div>
+<h2>DP Descriptive Statistics</h2>
+<div class='fn'><h3>stat_sensitivities</h3><p class='desc'>Sensitivity of common bounded-data statistics</p><pre class='usage'>stat_sensitivities(bounds, n)</pre></div>
+<div class='fn'><h3>dp_mean</h3><p class='desc'>DP mean</p><pre class='usage'>dp_mean(
+  x,
+  epsilon,
+  bounds = range(x, na.rm = TRUE),
+  mechanism = c("laplace", "gaussian", "analytic_gaussian"),
+  delta = NULL
+)</pre></div>
+<div class='fn'><h3>dp_variance</h3><p class='desc'>DP variance</p><pre class='usage'>dp_variance(
+  x,
+  epsilon,
+  bounds = range(x, na.rm = TRUE),
+  mechanism = c("laplace", "gaussian"),
+  delta = NULL
+)</pre></div>
+<div class='fn'><h3>dp_quantile</h3><p class='desc'>DP quantile via the exponential mechanism</p><pre class='usage'>dp_quantile(x, epsilon, bounds, probs = 0.5, n_bins = 1000)</pre></div>
+<div class='fn'><h3>dp_median</h3><p class='desc'>DP median via the exponential mechanism</p><pre class='usage'>dp_median(x, epsilon, bounds, n_bins = 1000)</pre></div>
+<div class='fn'><h3>dp_histogram</h3><p class='desc'>DP histogram</p><pre class='usage'>dp_histogram(x, epsilon, breaks = NULL, normalize = FALSE)</pre></div>
+<h2>DP Hypothesis Tests</h2>
+<div class='fn'><h3>dp_t_test</h3><p class='desc'>DP two-sample t-test</p><pre class='usage'>dp_t_test(
+  x,
+  y,
+  epsilon,
+  bounds = c(min(c(x, y), na.rm = TRUE), max(c(x, y), na.rm = TRUE)),
+  alternative = c("two.sided", "less", "greater"),
+  delta = NULL
+)</pre></div>
+<div class='fn'><h3>dp_chisq_test</h3><p class='desc'>DP chi-square test of independence</p><pre class='usage'>dp_chisq_test(table, epsilon)</pre></div>
+<div class='fn'><h3>dp_ks_test</h3><p class='desc'>DP Kolmogorov-Smirnov test</p><pre class='usage'>dp_ks_test(
+  x,
+  y,
+  epsilon,
+  bounds = c(min(c(x, y), na.rm = TRUE), max(c(x, y), na.rm = TRUE)),
+  n_grid = 100
+)</pre></div>
+<div class='fn'><h3>asymptotic_ks_pvalue</h3><p class='desc'>Asymptotic Kolmogorov distribution survival function</p><pre class='usage'>asymptotic_ks_pvalue(q)</pre></div>
+<div class='fn'><h3>dp_anova</h3><p class='desc'>DP one-way ANOVA F-test</p><pre class='usage'>dp_anova(formula, data, epsilon, bounds, delta = NULL)</pre></div>
+<h2>DP Regression & Inference</h2>
+<div class='fn'><h3>dp_lm</h3><p class='desc'>Differentially private linear regression</p><pre class='usage'>dp_lm(
+  formula,
+  data,
+  epsilon,
+  delta,
+  bounds = NULL,
+  assume_public_design = TRUE
+)</pre></div>
+<div class='fn'><h3>dp_lm_sensitivity</h3><p class='desc'>Global L2 sensitivity of OLS coefficients</p><pre class='usage'>dp_lm_sensitivity(
+  X,
+  y_bounds,
+  x_norm_bound = NULL,
+  assume_public_design = TRUE
+)</pre></div>
+<div class='fn'><h3>summary.dp_lm</h3><p class='desc'>Summarize a dp_lm fit</p><pre class='usage'>summary.dp_lm(object, level = 0.95, ...)</pre></div>
+<div class='fn'><h3>dp_glm</h3><p class='desc'>DP-SGD for generalized linear models</p><pre class='usage'>dp_glm(
+  formula,
+  data,
+  family = stats::gaussian(),
+  epsilon,
+  delta,
+  max_grad_norm = 1,
+  n_iter = 1000,</pre></div>
+<div class='fn'><h3>clip_gradients</h3><p class='desc'>Per-sample gradient clipping</p><pre class='usage'>clip_gradients(grads, max_grad_norm)</pre></div>
+<div class='fn'><h3>cpp_clip_gradients</h3><p class='desc'>Fast per-sample gradient clipping (C++)</p><pre class='usage'>cpp_clip_gradients(grads, max_grad_norm)</pre></div>
+<div class='fn'><h3>dp_confint</h3><p class='desc'>Privacy-aware confidence intervals</p><pre class='usage'>dp_confint(
+  object,
+  parm,
+  level = 0.95,
+  method = c("analytical", "parametric_bootstrap", "privacy_aware_bootstrap"),
+  B = 200,
+  ...
+)</pre></div>
+<div class='fn'><h3>confint.dp_lm</h3><p class='desc'>Confint interface for dp_lm objects</p><pre class='usage'>confint.dp_lm(object, parm, level = 0.95, method = "analytical", B = 200, ...)</pre></div>
+<h2>Privacy Budget & Composition</h2>
+<div class='fn'><h3>new_privacy_budget</h3><p class='desc'>Create a privacy budget object</p><pre class='usage'>new_privacy_budget(
+  epsilon,
+  delta = 1e-06,
+  composition = c("basic", "advanced", "rdp")
+)</pre></div>
+<div class='fn'><h3>spend</h3><p class='desc'>Spend privacy budget</p><pre class='usage'>spend(budget, epsilon, delta = 0, description = "")</pre></div>
+<div class='fn'><h3>can_spend</h3><p class='desc'>Check whether a release fits in the remaining budget</p><pre class='usage'>can_spend(budget, epsilon, delta = 0)</pre></div>
+<div class='fn'><h3>basic_composition</h3><p class='desc'>Basic (sequential) composition</p><pre class='usage'>basic_composition(epsilons, deltas = rep(0, length(epsilons)))</pre></div>
+<div class='fn'><h3>advanced_composition_epsilon</h3><p class='desc'>Advanced composition</p><pre class='usage'>advanced_composition_epsilon(prior_epsilons, new_epsilon, delta_prime = 1e-06)</pre></div>
+<div class='fn'><h3>epsilon_to_rdp</h3><p class='desc'>Convert epsilon-DP to zCDP (RDP) parameter</p><pre class='usage'>epsilon_to_rdp(epsilon)</pre></div>
+<div class='fn'><h3>rdp_to_epsilon</h3><p class='desc'>Convert zCDP (RDP) parameter to (epsilon, delta)-DP</p><pre class='usage'>rdp_to_epsilon(rho, delta)</pre></div>
+<div class='fn'><h3>rdp_composition</h3><p class='desc'>RDP composition</p><pre class='usage'>rdp_composition(epsilons, delta = 1e-06)</pre></div>
+<div class='fn'><h3>laplace_plr_tail</h3><p class='desc'>Privacy loss random variables for the Laplace mechanism</p><pre class='usage'>laplace_plr_tail(t, epsilon)
+laplace_plr_quantile(p, epsilon)</pre></div>
+<div class='fn'><h3>empirical_delta_from_losses</h3><p class='desc'>Empirical delta from simulated privacy losses</p><pre class='usage'>empirical_delta_from_losses(losses, epsilon)</pre></div>
+<div class='fn'><h3>simulate_gaussian_losses</h3><p class='desc'>Simulate privacy losses of Gaussian releases</p><pre class='usage'>simulate_gaussian_losses(n, sigma)</pre></div>
+<h2>Diagnostics</h2>
+<div class='fn'><h3>validate_coverage</h3><p class='desc'>Validate confidence-interval coverage by Monte Carlo</p><pre class='usage'>validate_coverage(
+  formula,
+  true_betas,
+  sigma = 1,
+  data_gen = NULL,
+  n = 500,
+  n_sims = 200,
+  epsilon = 1,</pre></div>
+<div class='fn'><h3>compare_utility</h3><p class='desc'>Compare utility of non-private and private fits</p><pre class='usage'>compare_utility(
+  formula,
+  data,
+  epsilon_grid,
+  delta = 1e-06,
+  bounds = NULL,
+  n_reps = 10
+)</pre></div>
+<div class='fn'><h3>compare_composition</h3><p class='desc'>Compare composition rules over a workflow</p><pre class='usage'>compare_composition(epsilons, delta = 1e-06)</pre></div>
+<div class='fn'><h3>dp_utility_diagnostics</h3><p class='desc'>Utility diagnostics for DP estimators</p><pre class='usage'>dp_utility_diagnostics(estimates, truth, ci_matrix = NULL)</pre></div>
+<h2>Print Methods</h2>
+<div class='fn'><h3>print.dp_estimate</h3><p class='desc'>Print method for dp_estimate objects</p><pre class='usage'>print.dp_estimate(x, digits = 4, ...)</pre></div>
+<div class='fn'><h3>print.dp_htest</h3><p class='desc'>Print method for dp_htest objects</p><pre class='usage'>print.dp_htest(x, digits = 4, ...)</pre></div>
+<div class='fn'><h3>print.dp_lm</h3><p class='desc'>Print method for dp_lm objects</p><pre class='usage'>print.dp_lm(x, ...)</pre></div>
+<div class='fn'><h3>print.summary.dp_lm</h3><p class='desc'>Print method for summary.dp_lm objects</p><pre class='usage'>print.summary.dp_lm(x, digits = 4, ...)</pre></div>
+<div class='fn'><h3>print.dp_glm</h3><p class='desc'>Print method for dp_glm objects</p><pre class='usage'>print.dp_glm(x, ...)</pre></div>
+<div class='fn'><h3>print.dp_confint</h3><p class='desc'>Print method for dp_confint objects</p><pre class='usage'>print.dp_confint(x, digits = 4, ...)</pre></div>
+<div class='fn'><h3>print.privacy_budget</h3><p class='desc'>Print method for privacy_budget objects</p><pre class='usage'>print.privacy_budget(x, ...)</pre></div>
+<div class="footer">Generated from the package Rd documentation (DPrivStats 0.1.0). All DP releases consume declared privacy budget; outputs are valid under post-processing of privatized quantities.</div>
+</body></html>
